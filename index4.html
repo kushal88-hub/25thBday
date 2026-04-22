@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Happy Birthday Masiel!</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Dancing Script', cursive;
+  background: radial-gradient(circle, #fff0f5, #ffd6e0, #ffe6cc);
+  text-align: center;
+  overflow: hidden;
+}
+
+h1 {
+  color: #ff1493;
+  font-size: 3.5rem;
+}
+
+/* Layout */
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80vh;
+  padding: 0 40px;
+}
+
+/* Side images */
+.side-img {
+  width: 300px;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+/* Center */
+.center {
+  text-align: center;
+}
+
+/* Cake */
+.cake {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  margin: 20px auto;
+  background: #ff69b4;
+  border-radius: 10px;
+  box-shadow: inset 0 -10px #ff1493;
+}
+
+.candle {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 40px;
+  background: white;
+}
+
+.flame {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background: orange;
+  border-radius: 50%;
+  box-shadow: 0 0 20px yellow;
+  animation: flicker 0.2s infinite alternate;
+}
+
+@keyframes flicker {
+  from {transform: translateX(-50%) scale(1);}
+  to {transform: translateX(-50%) scale(1.2);}
+}
+
+.hidden {
+  display: none;
+}
+
+/* Hidden message */
+#message {
+  margin-top: 20px;
+  font-size: 1.8rem;
+  color: #6a0572;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+#message.show {
+  opacity: 1;
+}
+
+/* Audio */
+audio {
+  margin-top: 20px;
+  border-radius: 12px;
+  background: #fff0f5;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  padding: 5px;
+}
+
+/* Balloons */
+.balloon {
+  position: absolute;
+  width: 40px;
+  height: 60px;
+  border-radius: 50%;
+  animation: float 10s linear infinite;
+}
+
+@keyframes float {
+  0% {transform: translateY(100vh);}
+  100% {transform: translateY(-100vh);}
+}
+</style>
+</head>
+
+<body>
+
+<h1>Happy 24th Birthday, Masiel! 🎂</h1>
+
+<div class="container">
+
+  <!-- LEFT IMAGE -->
+  <img src="images/pic1.jpg" class="side-img">
+
+  <!-- CENTER -->
+  <div class="center">
+
+    <p>Make a wish… and blow the candle 💨</p>
+
+    <!-- CAKE -->
+    <div class="cake">
+      <div class="candle">
+        <div class="flame" id="flame"></div>
+      </div>
+    </div>
+
+    <!-- MESSAGE -->
+    <div id="message">
+      🎉 ¡Feliz cumpleaños, Masiel! 🎉 <br>
+      Que tu día esté lleno de amor, alegría y momentos inolvidables. <br>
+      Eres una persona increíble y mereces lo mejor hoy y siempre ❤️
+    </div>
+
+    <!-- AUDIO -->
+    <audio controls id="music">
+      <source src="dtmf.mp3" type="audio/mp3">
+      Your browser does not support the audio element.
+    </audio>
+
+  </div>
+
+  <!-- RIGHT IMAGE -->
+  <img src="images/pic2.jpg" class="side-img">
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+<script>
+const flame = document.getElementById("flame");
+const message = document.getElementById("message");
+const audio = document.getElementById("music");
+
+// 🎂 Blow function
+function blowOut() {
+  if (!flame.classList.contains("hidden")) {
+    flame.classList.add("hidden");
+
+    // Show message
+    message.classList.add("show");
+
+    // Confetti
+    confetti({
+      particleCount: 200,
+      spread: 100,
+      origin: { y: 0.6 }
+    });
+
+    // Play music AFTER blowing
+    audio.play();
+  }
+}
+
+// 🎤 Microphone detection
+navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+  const audioCtx = new AudioContext();
+  const mic = audioCtx.createMediaStreamSource(stream);
+  const analyser = audioCtx.createAnalyser();
+  mic.connect(analyser);
+
+  const data = new Uint8Array(analyser.frequencyBinCount);
+
+  function detect() {
+    analyser.getByteFrequencyData(data);
+    let volume = data.reduce((a,b)=>a+b)/data.length;
+
+    if (volume > 60) {
+      blowOut();
+    }
+
+    requestAnimationFrame(detect);
+  }
+
+  detect();
+
+}).catch(() => {
+  console.log("Mic not allowed");
+});
+
+// 👉 fallback click
+document.body.addEventListener("click", blowOut);
+
+// 🎈 Balloons
+function createBalloon() {
+  const b = document.createElement("div");
+  b.classList.add("balloon");
+  b.style.background = `hsl(${Math.random()*360},70%,60%)`;
+  b.style.left = Math.random()*window.innerWidth + "px";
+  document.body.appendChild(b);
+  setTimeout(()=>b.remove(),10000);
+}
+setInterval(createBalloon, 1200);
+
+</script>
+
+</body>
+</html>
